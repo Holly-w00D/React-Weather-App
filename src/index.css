@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'futuralight';
+}
+
+@font-face {
+  font-family: 'futuralight';
+  src: url('./elements/Fonts/futura_light-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
