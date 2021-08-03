@@ -57,20 +57,9 @@ const dateBuilder = (d) => {
 }
 const weatherDetails = (props) => {
   return (
-    <div className="Header" style={{ backgroundColor: props.color }}>
-      <div className="weather-box" style={{ backgroundColor: props.color }}>
-        <div className="weatherImgWrapper">
-          {/* <Icon name={weatherType} className={classes.Icon} /> */}
-          {/* <Icon type={props.data.description} icon={props.data.icon} /> */}
-
-          {Icon(props.data.icon)}
-
-          {/* <img
-            src="../../assets/images/Preview.svg"
-            alt="Rainy Icon"
-            className={classes.Icon}
-          ></img> */}
-        </div>
+    <div className=".weather-details-wrapper">
+      <div className="weather-box">
+        <div className="weatherImgWrapper">{Icon(props.data.icon)}</div>
         {typeof props.data.description &&
         props.data.temperature &&
         props.data.city &&

@@ -5,13 +5,14 @@ import { BounceLoader } from 'react-spinners'
 
 // import classes from '*.module.css'
 // import Card from '../../elements/Card/Card'
-//import Header from '../../components/WeatherDetails/Header'
+import Header from '../../components/Header/Header'
 // import Footer from '../../components/Footer/Footer'
 import SearchBar from '../../components/SearchBar/SearchBar'
 import WeatherDetails from '../../components/WeatherDetails/WeatherDetails'
 import Preview from '../../components/Preview/Preview'
 import assetMapper from '../../assets/assetMapper.json'
 import ErrorNotice from '../../components/ErrorNotice/ErrorNotice'
+import WeatherDetailsWeekly from '../../components/WeeklyWeatherDetails/WeeklyWeatherDetails'
 
 class App extends Component {
   // const api = {
@@ -36,14 +37,16 @@ class App extends Component {
 
   state = {
     searchBarInput: '',
-    weatherDetails: {
-      temperature: null,
-      description: '',
-      city: '',
-      country: '',
-      main: '',
-      icon: 'Preview',
-    },
+    weatherDetails: [
+      {
+        temperature: null,
+        description: '',
+        city: '',
+        country: '',
+        main: '',
+        icon: 'Preview',
+      },
+    ],
     loading: false,
     error: false,
   }
@@ -72,17 +75,20 @@ class App extends Component {
             .then((data) => {
               console.log(data)
               if (data.cod === 200) {
-                this.setState({
-                  weatherDetails: {
-                    temperature: data.main.temp,
-                    description: data.weather[0].main,
-                    city: data.name,
-                    country: data.sys.country,
-                    main: data.main,
-                    icon: data.weather[0].icon,
+                this.setState(
+                  {
+                    weatherDetails: {
+                      temperature: data.main.temp,
+                      description: data.weather[0].main,
+                      city: data.name,
+                      country: data.sys.country,
+                      main: data.main,
+                      icon: data.weather[0].icon,
+                    },
+                    loading: false,
                   },
-                  loading: false,
-                })
+                  () => console.log(this.state),
+                )
               } else {
                 throw data.cod
               }
@@ -118,7 +124,7 @@ class App extends Component {
 
     return (
       <div className="App">
-        {/* <Header
+        <Header
           color={
             assetMapper.colors[
               // Set header color based on weather condition; if error, set color to red
@@ -126,7 +132,13 @@ class App extends Component {
             ]
           }
           onClickHandler={this.tryAgainHandler}
-        /> */}
+        />
+        <SearchBar
+          value={this.state.searchBarInput}
+          onChange={this.searchBarHandler}
+          onKeyPress={this.setWeather}
+          error={this.state.error}
+        />
         <WeatherDetails
           data={this.state.weatherDetails}
           color={
@@ -144,12 +156,23 @@ class App extends Component {
         >
           {cardContent}
         </WeatherDetails>
-        <SearchBar
-          value={this.state.searchBarInput}
-          onChange={this.searchBarHandler}
-          onKeyPress={this.setWeather}
-          error={this.state.error}
-        />
+        <WeatherDetailsWeekly
+          data={this.state.weatherDetails}
+          color={
+            assetMapper.colors[
+              // Set header color based on weather condition; if error, set color to red
+              this.state.error ? 'error' : this.state.weatherDetails.description
+            ]
+          }
+          onClickHandler={this.tryAgainHandler}
+          // src={
+          //   assetMapper.icons[
+          //     this.state.error ? 'error' : this.state.weatherDetails.description
+          //   ]
+          // }
+        >
+          {cardContent}
+        </WeatherDetailsWeekly>
       </div>
     )
   }
