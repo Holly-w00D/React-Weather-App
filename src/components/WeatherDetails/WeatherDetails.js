@@ -60,21 +60,19 @@ const weatherDetails = (props) => {
     <div className=".weather-details-wrapper">
       <div className="weather-box">
         <div className="weatherImgWrapper">{Icon(props.data.icon)}</div>
-        {typeof props.data.description &&
-        props.data.temperature &&
-        props.data.city &&
-        props.data.country !== 'undefined' ? (
-          <div>
-            <div className="location">
-              {props.data.city}, {props.data.country}
+        {props.data.description &&
+          props.data.temperature &&
+          props.data.city &&
+          props.data.country && (
+            <div>
+              <div className="location">
+                {props.data.city}, {props.data.country}
+              </div>
+              <div className="temp">{Math.round(props.data.temperature)}°c</div>
+              <div className="weather">{props.data.description}</div>
+              <div className="date">{dateBuilder(new Date())}</div>
             </div>
-            <div className="temp">{Math.round(props.data.temperature)}°c</div>
-            <div className="weather">{props.data.description}</div>
-            <div className="date">{dateBuilder(new Date())}</div>
-          </div>
-        ) : (
-          ''
-        )}
+          )}
       </div>
     </div>
   )

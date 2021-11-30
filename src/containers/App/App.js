@@ -12,7 +12,7 @@ import WeatherDetails from '../../components/WeatherDetails/WeatherDetails'
 import Preview from '../../components/Preview/Preview'
 import assetMapper from '../../assets/assetMapper.json'
 import ErrorNotice from '../../components/ErrorNotice/ErrorNotice'
-import WeatherDetailsWeekly from '../../components/WeeklyWeatherDetails/WeeklyWeatherDetails'
+import { WeatherDetailsWeekly } from 'components/WeeklyWeatherDetails'
 
 class App extends Component {
   // const api = {
@@ -37,16 +37,21 @@ class App extends Component {
 
   state = {
     searchBarInput: '',
-    weatherDetails: [
-      {
-        temperature: null,
-        description: '',
-        city: '',
-        country: '',
-        main: '',
-        icon: 'Preview',
-      },
-    ],
+    weatherDetails: {
+      temperature: null,
+      description: '',
+      city: '',
+      country: '',
+      main: '',
+      icon: 'Preview',
+    },
+    weatherDetailsWeekly: {
+      description: '',
+      city: '',
+      country: '',
+      icon: 'Preview',
+      list: [],
+    },
     loading: false,
     error: false,
   }
@@ -62,65 +67,93 @@ class App extends Component {
       const city = this.state.searchBarInput
       const API_KEY = 'a9f3aeedf7e9d4a5bccfab2f3dc2e3e2'
       const API_URL = 'https://api.openweathermap.org/data/2.5/'
-      const URL = API_URL + `weather?q=${city}&appid=${API_KEY}&units=metric`
+      const todayURL =
+        API_URL + `weather?q=${city}&appid=${API_KEY}&units=metric`
+      const weekUrl =
+        API_URL + `forecast?q=${city}&appid=${API_KEY}&units=metric`
+      // const todayURL = `https://api.openweathermap.org/data/2.5/weather`
+      // const zipURL = `https://api.zip-codes.com/ZipCodesAPI.svc/1.0/QuickGetZipCodeDetails/`
+
+      //TODO refactor async calls to use modern async await and try catch
+      // async function getData() {
+      //   try {
+      //     // set loading = true
+      //     const response = await getDayWeather()
+      //     this.setState({ foo: mapFoo(response.data) })
+      //     // deal with response
+      //   } catch (error) {
+      //     // deal with error
+      //   } finally {
+      //     // end loading
+      //   }
+      // }
+
       this.setState(
         {
-          weatherDetails: {},
           loading: true,
           error: false,
         },
         () => {
-          fetch(URL)
-            .then((res) => res.json())
-            .then((data) => {
-              console.log(data)
-              if (data.cod === 200) {
-                this.setState(
-                  {
-                    weatherDetails: {
-                      temperature: data.main.temp,
-                      description: data.weather[0].main,
-                      city: data.name,
-                      country: data.sys.country,
-                      main: data.main,
-                      icon: data.weather[0].icon,
-                    },
-                    loading: false,
-                  },
-                  () => console.log(this.state),
-                )
+          fetch(todayURL)
+            .then((res) => {
+              if (res.status === 200) {
+                return res.json()
               } else {
-                throw data.cod
+                throw Error(res.status)
               }
             })
-            .catch((err) => {
-              console.log(err)
+            .then((data) => {
               this.setState({
-                loading: false,
-                error: true,
+                weatherDetails: {
+                  temperature: data.main.temp,
+                  description: data.weather[0].main,
+                  city: data.name,
+                  country: data.sys.country,
+                  main: data.main,
+                  icon: data.weather[0].icon,
+                },
               })
             })
         },
+        fetch(weekUrl)
+          .then((res) => {
+            if (res.status === 200) {
+              return res.json()
+            } else {
+              throw Error(res.status)
+            }
+          })
+          .then((data) => {
+            this.setState({
+              weatherDetailsWeekly: {
+                description: data.list[0].weather[0].description,
+                city: data.name,
+                country: data.city.country,
+                icon: data.list[0].weather[0].icon,
+                list: data.list.slice(0, 5),
+              },
+            })
+          })
+          .catch((err) => {
+            console.log(err)
+            this.setState({
+              error: true,
+            })
+          })
+          .finally(() => {
+            this.setState({
+              loading: false,
+            })
+          }),
       )
     }
   }
 
   render() {
+    const { loading, error, weatherDetails, weatherDetailsWeekly } = this.state
+
     // Conditionally render card content
-    let cardContent = <Preview />
-    if (this.state.loading) {
-      cardContent = <BounceLoader />
-    } else if (this.state.error) {
-      cardContent = <ErrorNotice onClickHandler={this.tryAgainHandler} />
-    } else if (
-      this.state.weatherDetails.temperature &&
-      this.state.weatherDetails.description &&
-      this.state.weatherDetails.city &&
-      this.state.weatherDetails.country !== ''
-    ) {
-      // Display weather information if temperature and description exists
-      cardContent = <WeatherDetails data={this.state.weatherDetails} />
-    }
+    // let cardContent = <Preview />
 
     return (
       <div className="App">
@@ -128,7 +161,7 @@ class App extends Component {
           color={
             assetMapper.colors[
               // Set header color based on weather condition; if error, set color to red
-              this.state.error ? 'error' : this.state.weatherDetails.description
+              error ? 'error' : this.state.weatherDetails.description
             ]
           }
           onClickHandler={this.tryAgainHandler}
@@ -137,42 +170,44 @@ class App extends Component {
           value={this.state.searchBarInput}
           onChange={this.searchBarHandler}
           onKeyPress={this.setWeather}
-          error={this.state.error}
+          error={error}
         />
-        <WeatherDetails
-          data={this.state.weatherDetails}
-          color={
-            assetMapper.colors[
-              // Set header color based on weather condition; if error, set color to red
-              this.state.error ? 'error' : this.state.weatherDetails.description
-            ]
-          }
-          onClickHandler={this.tryAgainHandler}
-          // src={
-          //   assetMapper.icons[
-          //     this.state.error ? 'error' : this.state.weatherDetails.description
-          //   ]
-          // }
-        >
-          {cardContent}
-        </WeatherDetails>
-        <WeatherDetailsWeekly
-          data={this.state.weatherDetails}
-          color={
-            assetMapper.colors[
-              // Set header color based on weather condition; if error, set color to red
-              this.state.error ? 'error' : this.state.weatherDetails.description
-            ]
-          }
-          onClickHandler={this.tryAgainHandler}
-          // src={
-          //   assetMapper.icons[
-          //     this.state.error ? 'error' : this.state.weatherDetails.description
-          //   ]
-          // }
-        >
-          {cardContent}
-        </WeatherDetailsWeekly>
+        {error && <ErrorNotice onClickHandler={this.tryAgainHandler} />}
+        {loading && <BounceLoader />}
+        {!error && !loading && weatherDetails && weatherDetailsWeekly && (
+          <>
+            <WeatherDetails
+              data={weatherDetails}
+              color={
+                assetMapper.colors[
+                  // Set header color based on weather condition; if error, set color to red
+                  error ? 'error' : weatherDetails.description
+                ]
+              }
+              onClickHandler={this.tryAgainHandler}
+              // src={
+              //   assetMapper.icons[
+              //     error ? 'error' : this.state.weatherDetails.description
+              //   ]
+              // }
+            />
+            <WeatherDetailsWeekly
+              {...weatherDetailsWeekly}
+              color={
+                assetMapper.colors[
+                  // Set header color based on weather condition; if error, set color to red
+                  error ? 'error' : weatherDetailsWeekly.description
+                ]
+              }
+              onClickHandler={this.tryAgainHandler}
+              // src={
+              //   assetMapper.icons[
+              //     error ? 'error' : this.state.weatherDetails.description
+              //   ]
+              // }
+            />
+          </>
+        )}
       </div>
     )
   }
