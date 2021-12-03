@@ -3,6 +3,7 @@ import ClearDay from './icons/ClearDay'
 import ClearNight from './icons/ClearNight'
 import Cloudy from './icons/Cloudy'
 import Fog from './icons/Fog'
+import MostlyCloudyDay from './icons/MostlyCloudyDay'
 import PartlyCloudyDay from './icons/PartlyCloudyDay'
 import PartlyCloudyNight from './icons/PartlyCloudyNight'
 import Rain from './icons/Rain'
@@ -22,8 +23,14 @@ const Icon = ({ type }: IconProps): JSX.Element => {
     case '01n':
       return <ClearNight />
 
-    case '03d':
+    case '02d':
       return <PartlyCloudyDay />
+
+    case '02n':
+      return <PartlyCloudyNight />
+
+    case '03d':
+      return <MostlyCloudyDay />
 
     case '03n':
       return <PartlyCloudyNight />
@@ -31,7 +38,13 @@ const Icon = ({ type }: IconProps): JSX.Element => {
     case '04d':
       return <Cloudy />
 
+    case '04n':
+      return <Cloudy />
+
     case '10d':
+      return <Rain />
+
+    case '10n':
       return <Rain />
 
     // case 'sleet':

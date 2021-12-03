@@ -8,10 +8,10 @@ import { BounceLoader } from 'react-spinners'
 import Header from '../../components/Header/Header'
 // import Footer from '../../components/Footer/Footer'
 import SearchBar from '../../components/SearchBar/SearchBar'
-import WeatherDetails from '../../components/WeatherDetails/WeatherDetails'
 import Preview from '../../components/Preview/Preview'
 import assetMapper from '../../assets/assetMapper.json'
 import ErrorNotice from '../../components/ErrorNotice/ErrorNotice'
+import WeatherDetails from '../../components/WeatherDetails/WeatherDetails.tsx'
 import { WeatherDetailsWeekly } from 'components/WeeklyWeatherDetails'
 
 class App extends Component {
@@ -50,7 +50,8 @@ class App extends Component {
       city: '',
       country: '',
       icon: 'Preview',
-      list: [],
+      fullData: [],
+      dailyData: [],
     },
     loading: false,
     error: false,
@@ -124,15 +125,20 @@ class App extends Component {
             }
           })
           .then((data) => {
+            const dailyData = data.list.filter((forecast) =>
+              forecast.dt_txt.includes('18:00:00'),
+            )
             this.setState({
               weatherDetailsWeekly: {
-                description: data.list[0].weather[0].description,
                 city: data.name,
                 country: data.city.country,
+                fullData: data.list,
+                dailyData: dailyData,
+                description: data.list[0].weather[0].description,
                 icon: data.list[0].weather[0].icon,
-                list: data.list.slice(0, 5),
               },
             })
+            console.log(this.state)
           })
           .catch((err) => {
             console.log(err)
@@ -193,12 +199,6 @@ class App extends Component {
             />
             <WeatherDetailsWeekly
               {...weatherDetailsWeekly}
-              color={
-                assetMapper.colors[
-                  // Set header color based on weather condition; if error, set color to red
-                  error ? 'error' : weatherDetailsWeekly.description
-                ]
-              }
               onClickHandler={this.tryAgainHandler}
               // src={
               //   assetMapper.icons[
